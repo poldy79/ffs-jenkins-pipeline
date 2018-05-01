@@ -168,7 +168,7 @@ pipeline {
             steps {
                 script {
                     echo "step ${STAGE_NAME}"
-                    echo ${allArchs}
+                    echo "Archs: ${allArchs}"
                     dir('output') { deleteDir() }
                     /* 
                     if (params.ar71xx_generic) { unstash "ar71xx-generic" }
