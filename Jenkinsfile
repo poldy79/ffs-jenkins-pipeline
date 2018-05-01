@@ -1,5 +1,5 @@
 #!/usr/bin/env groovy
-ources() {
+def fetchSources() {
     //checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'refs/tags/v2017.1.7']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
     checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "refs/tags/${params.GLUON}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
     //git branch: 'master', changelog: false, poll: false, url: 'https://github.com/freifunk-gluon/gluon.git'
@@ -10,7 +10,7 @@ ources() {
     }
 }
 
-def buildArch() {
+def buildArch(archs) {
     echo "step ${STAGE_NAME}"
     echo "BUILD_DATE: ${BUILD_DATE}"
     if (params.clean_workspace) {
@@ -23,8 +23,10 @@ def buildArch() {
         sh "nice make GLUON_TARGET=${STAGE_NAME} clean"
     }
     sh "nice make update"
-    sh "nice make -j${params.processors} ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${STAGE_NAME} BUILD_DATE=${BUILD_DATE}"
-    sh "find output/"
+    for (arch in archs) {
+        sh "nice make -j${params.processors} ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
+    }
+    //sh "find output/"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
 
@@ -67,10 +69,15 @@ pipeline {
         stage('init') {
             agent { label 'master'}
             steps {
-                fetchSources()
                 script {
+                    def allArchs = []
+                    fetchSources()
                     
-                    BUILD_DATE=params.BUILD_DATE
+                    if (params.BUILD_DATE != "") {
+                        BUILD_DATE=params.BUILD_DATE
+                    } else {
+                        def BUILD_DATE = sh (returnStdout: true, script: 'date +%Y-%m-%d')
+                    } 
                 }
                 echo "${BUILD_DATE} in setup"
             }
@@ -78,65 +85,69 @@ pipeline {
         stage('compile') {
 
             parallel {
-                stage('ar71xx-generic') {
+                stage('ar71xx') {
                     agent { label 'master'}
-                    when { expression {return params.ar71xx_generic } }
-                    steps { script { buildArch()} }
+                    when { expression {return params.ar71xx_generic || params.ar71xx_nand || params.ar71xx_tiny } }
+                    steps { script { 
+                        def archs = []
+                        if (params.ar71xx_generic) { archs << 'ar71xx-generic'}
+                        if (params.ar71xx_nand) { archs << 'ar71xx-nand'}
+                        if (params.ar71xx_tiny) { archs << 'ar71xx-tiny'}
+                        buildArch(archs)
+                        allArchs << archs
+                        echo $allArchs
+                    } }
                 }
-                stage('ar71xx-nand') {
+                stage('brcm2708') {
                     agent { label 'master' }
-                    when { expression {return params.ar71xx_nand } }
-                    steps { script { buildArch()} }
-                }
-                stage('ar71xx-tiny') {
-                    agent { label 'master' }
-                    when { expression {return params.ar71xx_tiny } }
-                    steps { script { buildArch()} }
-                }
-                stage('brcm2708-bcm2708') {
-                    agent { label 'master' }
-                    when { expression {return params.brcm2708_bcm2708 } }
-                    steps { script { buildArch()} }
-                }
-                stage('brcm2708-bcm2709') {
-                    agent { label 'master' }
-                    when { expression {return params.brcm2708_bcm2709 } }
-                    steps { script { buildArch()} }
-                }
-                stage('brcm2708-bcm2710') {
-                    agent { label 'master'}
-                    when { expression {return params.brcm2708_bcm2710 } }
-                    steps { script { buildArch()} }
+                    when { expression {return params.brcm2708_bcm2708 || params.brcm2708_bcm2709 || params.brcm2708_bcm2710 } }
+                    steps { script { 
+                        def archs = []
+                        if (params.brcm2708_bcm2708) { archs << 'brcm2708-bcm2708'}
+                        if (params.brcm2708_bcm2709) { archs << 'brcm2708-bcm2709'}
+                        if (params.brcm2708_bcm2710) { archs << 'brcm2708-bcm2710'}
+                        buildArch(archs)
+                        allArchs << archs
+                    } }
                 }
                 stage('ipq806x') {
                     agent { label 'master'}
                     when { expression {return params.ipq806x } }
-                    steps { script { buildArch()} }
+                    steps { script { 
+                        def archs = []
+                        buildArch(["ipq806x"])
+                        allArchs << "ipq806x"
+                    } }
                 }
                 stage('mpc85xx-generic') {
                     agent { label 'master'}
                     when { expression {return params.mpc85xx_generic } }
-                    steps { script { buildArch()} }
+                    steps { script { 
+                        def archs = []
+                        buildArch(["mpc85xx_generic"])
+                        allArchs << "mpc85xx-generic"
+                    } }
                 }
                 stage('mvebu') {
                     agent { label 'master'}
                     when { expression {return params.mvebu } }
-                    steps { script { buildArch()} }
+                    steps { script { 
+                        def archs = []
+                        buildArch("mvebu")
+                        allArchs << "mvebu"
+                    } }
                 }
                 stage('ramips-mt7621') {
                     agent { label 'master'}
-                    when { expression {return params.ramips_mt7621 } }
-                    steps { script { buildArch()} }
-                }
-                stage('ramips-mt7628') {
-                    agent { label 'master'}
-                    when { expression {return params.ramips_mt7628 } }
-                    steps { script { buildArch()} }
-                }
-                stage('ramips-rt305x') {
-                    agent { label 'master'}
-                    when { expression {return params.ramips_rt305x } }
-                    steps { script { buildArch()} }
+                    when { expression {return params.ramips_mt7621 || params.ramips_mt7628 || params.ramips_rt305x } }
+                    steps { script { 
+                        def archs = []
+                        if (params.ramips_mt7621) { archs << 'ramips-mt7621' }
+                        if (params.ramips_mt7628) { archs << 'ramips-mt7628' }
+                        if (params.ramips_rt305x) { archs << 'ramips-rt305x' }
+                        buildArch(archs)
+                        allArchs << archs
+                    } }
                 }
                 stage('sunxi') {
                     agent { label 'master'}
@@ -145,18 +156,14 @@ pipeline {
                 }
                 stage('x86-generic') {
                     agent { label 'master'}
-                    when { expression {return params.x86_generic } }
-                    steps { script { buildArch()} }
-                }
-                stage('x86-genode') {
-                    agent { label 'master'}
-                    when { expression {return params.x86_genode } }
-                    steps { script { buildArch()} }
-                }
-                stage('x86-64') {
-                    agent { label 'master'}
-                    when { expression {return params.x86_64 } }
-                    steps { script { buildArch()} }
+                    when { expression {return params.x86_generic || params.x86_genode || params.x86_64 } }
+                    steps { script { 
+                        if (params.x86_generic) { archs << 'x86-generic' }
+                        if (params.x86_genode) { archs << 'x86-genode' }
+                        if (params.x86_64) { archs << 'x86-64' }
+                        buildArch(archs)
+                        allArchs << archs
+                    } }
                 }
             }
         }
@@ -166,8 +173,9 @@ pipeline {
             steps {
                 script {
                     echo "step ${STAGE_NAME}"
+                    echo ${allArchs}
                     dir('output') { deleteDir() }
-    
+                    /* 
                     if (params.ar71xx_generic) { unstash "ar71xx-generic" }
                     if (params.ar71xx_nand) { unstash "ar71xx-nand" }
                     if (params.ar71xx_tiny) { unstash "ar71xx-tiny" }
@@ -177,7 +185,10 @@ pipeline {
                     if (params.x86_generic) { unstash "x86-generic" }
                     if (params.x86_genode) { unstash "x86-genode" }
                     if (params.x86_64){ unstash "x86-64" }
-                    
+                    */
+                    for (arch in allArchs) {
+                        sh "echo unstage ${arch}"
+                    }
                     sh "make manifest GLUON_BRANCH=stable"
                     sh "make manifest GLUON_BRANCH=beta"
                     sh "make manifest GLUON_BRANCH=nightly"
