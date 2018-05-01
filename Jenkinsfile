@@ -87,10 +87,11 @@ pipeline {
             parallel {
                 stage('ar71xx') {
                     agent { label 'master'}
-                    when { expression {return params.ar71xx_generic || params.ar71xx_nand || params.ar71xx_tiny } }
+                    when { expression {return params.ar71xx_generic || params.ar71xx_mikrotik || params.ar71xx_nand || params.ar71xx_tiny } }
                     steps { script { 
                         def archs = []
                         if (params.ar71xx_generic) { archs << 'ar71xx-generic'}
+                        if (params.ar71xx_mikrotik) { archs << 'ar71xx-mikrotik'}
                         if (params.ar71xx_nand) { archs << 'ar71xx-nand'}
                         if (params.ar71xx_tiny) { archs << 'ar71xx-tiny'}
                         buildArch(archs)
