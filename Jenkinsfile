@@ -20,13 +20,15 @@ def buildArch(archs) {
     dir('output') { deleteDir() }
 
     if (params.make_clean) {
-        sh "nice make GLUON_TARGET=${STAGE_NAME} clean"
+        for (arch in archs) {
+            sh "nice make GLUON_TARGET=${arch} clean"
+        }
     }
     sh "nice make update"
     for (arch in archs) {
         sh "nice make -j${params.processors} ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
+        //allArchs << arch
     }
-    //sh "find output/"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
 
@@ -95,8 +97,6 @@ pipeline {
                         if (params.ar71xx_nand) { archs << 'ar71xx-nand'}
                         if (params.ar71xx_tiny) { archs << 'ar71xx-tiny'}
                         buildArch(archs)
-                        allArchs << archs
-                        echo $allArchs
                     } }
                 }
                 stage('brcm2708') {
@@ -108,7 +108,6 @@ pipeline {
                         if (params.brcm2708_bcm2709) { archs << 'brcm2708-bcm2709'}
                         if (params.brcm2708_bcm2710) { archs << 'brcm2708-bcm2710'}
                         buildArch(archs)
-                        allArchs << archs
                     } }
                 }
                 stage('ipq806x') {
@@ -117,7 +116,6 @@ pipeline {
                     steps { script { 
                         def archs = []
                         buildArch(["ipq806x"])
-                        allArchs << "ipq806x"
                     } }
                 }
                 stage('mpc85xx-generic') {
@@ -126,7 +124,6 @@ pipeline {
                     steps { script { 
                         def archs = []
                         buildArch(["mpc85xx_generic"])
-                        allArchs << "mpc85xx-generic"
                     } }
                 }
                 stage('mvebu') {
@@ -135,7 +132,6 @@ pipeline {
                     steps { script { 
                         def archs = []
                         buildArch("mvebu")
-                        allArchs << "mvebu"
                     } }
                 }
                 stage('ramips-mt7621') {
@@ -147,7 +143,6 @@ pipeline {
                         if (params.ramips_mt7628) { archs << 'ramips-mt7628' }
                         if (params.ramips_rt305x) { archs << 'ramips-rt305x' }
                         buildArch(archs)
-                        allArchs << archs
                     } }
                 }
                 stage('sunxi') {
@@ -163,7 +158,6 @@ pipeline {
                         if (params.x86_genode) { archs << 'x86-genode' }
                         if (params.x86_64) { archs << 'x86-64' }
                         buildArch(archs)
-                        allArchs << archs
                     } }
                 }
             }
