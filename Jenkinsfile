@@ -88,7 +88,7 @@ pipeline {
 
             parallel {
                 stage('ar71xx') {
-                    agent { label 'master'}
+                    agent { label 'test1'}
                     when { expression {return params.ar71xx_generic || params.ar71xx_mikrotik || params.ar71xx_nand || params.ar71xx_tiny } }
                     steps { script { 
                         def archs = []
