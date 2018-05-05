@@ -30,7 +30,7 @@ def buildArch(archs) {
     }
     sh """
         make manifest GLUON_BRANCH=stable
-        LEN=`wc -l output/images/sysupgrade/stable.manifest`
+        export LEN=`wc -l output/images/sysupgrade/stable.manifest`
         
         tail -n `expr \$LEN - 4` output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest.${STAGE_NAME}
         rm -f output/images/sysupgrade/stable.manifest
