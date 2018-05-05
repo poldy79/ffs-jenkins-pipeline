@@ -106,6 +106,7 @@ pipeline {
                         if (params.brcm2708_bcm2708) { archs << 'brcm2708-bcm2708'}
                         if (params.brcm2708_bcm2709) { archs << 'brcm2708-bcm2709'}
                         if (params.brcm2708_bcm2710) { archs << 'brcm2708-bcm2710'}
+                        echo "Archs for ${STAGE_NAME}: ${archs}"
                         buildArch(archs)
                     } }
                 }
@@ -149,13 +150,15 @@ pipeline {
                     when { expression {return params.sunxi } }
                     steps { script { buildArch()} }
                 }
-                stage('x86-generic') {
+                stage('x86') {
                     agent any
                     when { expression {return params.x86_generic || params.x86_genode || params.x86_64 } }
                     steps { script { 
+                        def archs = []
                         if (params.x86_generic) { archs << 'x86-generic' }
                         if (params.x86_genode) { archs << 'x86-genode' }
                         if (params.x86_64) { archs << 'x86-64' }
+                        echo "Archs for ${STAGE_NAME}: ${archs}"
                         buildArch(archs)
                     } }
                 }
