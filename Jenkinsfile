@@ -161,7 +161,8 @@ pipeline {
                         if (params.x86_64) { archs << 'x86-64' }
                         echo "Archs for ${STAGE_NAME}: ${archs}"
                         buildArch(archs)
-                        allArchs << archs
+                        for arch in archs:
+                            allArchs << arch
                     } }
                 }
             }
