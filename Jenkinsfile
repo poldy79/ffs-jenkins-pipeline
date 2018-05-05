@@ -27,8 +27,8 @@ def buildArch(archs) {
     sh "nice make update"
     for (arch in archs) {
         sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
-        //allArchs << arch
     }
+    allArchs << "${STAGE_NAME}
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
 
@@ -161,9 +161,6 @@ pipeline {
                         if (params.x86_64) { archs << 'x86-64' }
                         echo "Archs for ${STAGE_NAME}: ${archs}"
                         buildArch(archs)
-                        for (arch in archs) {
-                            allArchs << arch
-                        }
                     } }
                 }
             }
