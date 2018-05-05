@@ -28,12 +28,11 @@ def buildArch(archs) {
     for (arch in archs) {
         sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
     }
-    sh """
-        make manifest GLUON_BRANCH=stable
-        tail -n +4 output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest.${STAGE_NAME}
-        cat part.manifest.${STAGE_NAME} 
-        rm -f output/images/sysupgrade/stable.manifest
-    """
+    sh 'make manifest GLUON_BRANCH=stable'
+    sh 'tail -n +4 output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest'
+    sh 'cat part.manifest'
+    sh 'rm -f output/images/sysupgrade/stable.manifest'
+    sh "mv output/images/sysupgrade/part.manifest output/images/sysupgrade/part.manifest.${STAGE_NAME}"
     allArchs << "${STAGE_NAME}"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
