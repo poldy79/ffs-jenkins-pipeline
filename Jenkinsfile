@@ -28,6 +28,13 @@ def buildArch(archs) {
     for (arch in archs) {
         sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
     }
+    sh "make manifest GLUON_BRANCH=stable"
+    sh """
+        LEN=`wc -l output/images/sysupgrade/stable.manifest`
+        
+        tail -n `expr \$LEN - 4` output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest.${STAGE_NAME}`
+        rm -f output/images/sysupgrade/stable.manifest
+    """
     allArchs << "${STAGE_NAME}"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
@@ -180,10 +187,14 @@ pipeline {
                         unstash "${arch}"
                     }
                     
-                    sh "make manifest GLUON_BRANCH=stable"
-                    sh "make manifest GLUON_BRANCH=beta"
-                    sh "make manifest GLUON_BRANCH=nightly"
-                    
+                    sh """
+                        make manifest GLUON_BRANCH=stable
+                        make manifest GLUON_BRANCH=beta
+                        make manifest GLUON_BRANCH=nightly
+                        cat output/images/sysupgrade/part.manifest.* >> output/images/sysupgrade/stable.manifest
+                        cat output/images/sysupgrade/part.manifest.* >> output/images/sysupgrade/beta.manifest
+                        cat output/images/sysupgrade/part.manifest.* >> output/images/sysupgrade/nightly.manifest
+                    """
                     archiveArtifacts artifacts: 'output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*', fingerprint: true
                 }
             }
@@ -191,20 +202,3 @@ pipeline {
     }
 }
 
-/*
-make -j$CORES GLUON_TARGET=ar71xx-tiny $OPTIONS
-make -j$CORES GLUON_TARGET=ar71xx-nand $OPTIONS
-make -j$CORES GLUON_TARGET=brcm2708-bcm2708 $OPTIONS
-make -j$CORES GLUON_TARGET=brcm2708-bcm2709 $OPTIONS
-make -j$CORES GLUON_TARGET=mpc85xx-generic $OPTIONS
-make -j$CORES GLUON_TARGET=x86-generic $OPTIONS
-make -j$CORES GLUON_TARGET=x86-geode $OPTIONS
-make -j$CORES GLUON_TARGET=x86-64 $OPTIONS
-make -j$CORES GLUON_TARGET=ar71xx-mikrotik $OPTIONS
-make -j$CORES GLUON_TARGET=ipq806x $OPTIONS
-make -j$CORES GLUON_TARGET=mvebu $OPTIONS
-make -j$CORES GLUON_TARGET=ramips-mt7621 $OPTIONS
-make -j$CORES GLUON_TARGET=ramips-mt7628 $OPTIONS
-make -j$CORES GLUON_TARGET=ramips-rt305x $OPTIONS
-make -j$CORES GLUON_TARGET=sunxi $OPTIONS
- */
