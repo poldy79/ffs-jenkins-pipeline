@@ -189,11 +189,11 @@ pipeline {
                     if (params.brcm2708_bcm2710 ) { unstash "brcm2708-bcm2710" }
                     */
                     if (params.x86_generic || params.x86_genode || params.x86_64) { unstash "x86" }
-                    /*
+                    
                     for (arch in allArchs) {
                         sh "echo unstage ${arch}"
                     }
-                    */
+                    
                     sh "make manifest GLUON_BRANCH=stable"
                     sh "make manifest GLUON_BRANCH=beta"
                     sh "make manifest GLUON_BRANCH=nightly"
