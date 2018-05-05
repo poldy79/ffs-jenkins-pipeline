@@ -28,7 +28,7 @@ def buildArch(archs) {
     for (arch in archs) {
         sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
     }
-    allArchs << "${STAGE_NAME}
+    allArchs << "${STAGE_NAME}"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
 
