@@ -72,7 +72,7 @@ pipeline {
             agent { label 'master'}
             steps {
                 script {
-                    def allArchs = []
+                    allArchs = []
                     fetchSources()
                     
                     if (params.BUILD_DATE != "") {
@@ -81,11 +81,18 @@ pipeline {
                         def BUILD_DATE = sh (returnStdout: true, script: 'date +%Y-%m-%d')
                     } 
                 }
+                echo "${allArchs}"
                 echo "${BUILD_DATE} in setup"
             }
         }
         stage('compile') {
             parallel {
+                stage('test') {
+                    agent any
+                    steps { script {
+                        allArchs << "foo"
+                    } }
+                }
                 stage('ar71xx') {
                     agent any
                     when { expression {return params.ar71xx_generic || params.ar71xx_mikrotik || params.ar71xx_nand || params.ar71xx_tiny } }
