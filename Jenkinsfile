@@ -85,10 +85,9 @@ pipeline {
             }
         }
         stage('compile') {
-
             parallel {
                 stage('ar71xx') {
-                    agent { label 'ar71xx'}
+                    agent any
                     when { expression {return params.ar71xx_generic || params.ar71xx_mikrotik || params.ar71xx_nand || params.ar71xx_tiny } }
                     steps { script { 
                         def archs = []
@@ -100,7 +99,7 @@ pipeline {
                     } }
                 }
                 stage('brcm2708') {
-                    agent { label 'master' }
+                    agent any
                     when { expression {return params.brcm2708_bcm2708 || params.brcm2708_bcm2709 || params.brcm2708_bcm2710 } }
                     steps { script { 
                         def archs = []
@@ -111,7 +110,7 @@ pipeline {
                     } }
                 }
                 stage('ipq806x') {
-                    agent { label 'master'}
+                    agent any
                     when { expression {return params.ipq806x } }
                     steps { script { 
                         def archs = []
@@ -119,7 +118,7 @@ pipeline {
                     } }
                 }
                 stage('mpc85xx-generic') {
-                    agent { label 'master'}
+                    agent any
                     when { expression {return params.mpc85xx_generic } }
                     steps { script { 
                         def archs = []
@@ -127,7 +126,7 @@ pipeline {
                     } }
                 }
                 stage('mvebu') {
-                    agent { label 'master'}
+                    agent any
                     when { expression {return params.mvebu } }
                     steps { script { 
                         def archs = []
@@ -135,7 +134,7 @@ pipeline {
                     } }
                 }
                 stage('ramips-mt7621') {
-                    agent { label 'master'}
+                    agent any
                     when { expression {return params.ramips_mt7621 || params.ramips_mt7628 || params.ramips_rt305x } }
                     steps { script { 
                         def archs = []
@@ -146,12 +145,12 @@ pipeline {
                     } }
                 }
                 stage('sunxi') {
-                    agent { label 'master'}
+                    agent any
                     when { expression {return params.sunxi } }
                     steps { script { buildArch()} }
                 }
                 stage('x86-generic') {
-                    agent { label 'master'}
+                    agent any
                     when { expression {return params.x86_generic || params.x86_genode || params.x86_64 } }
                     steps { script { 
                         if (params.x86_generic) { archs << 'x86-generic' }
@@ -167,23 +166,24 @@ pipeline {
             agent { label 'master'}
             steps {
                 script {
+                    fetchSources()
                     echo "step ${STAGE_NAME}"
                     echo "Archs: ${allArchs}"
                     dir('output') { deleteDir() }
+                    if (params.ar71xx_generic || params.ar71xx_nand || params.ar71xx_tiny) { unstash "ar71xx" }
                     /* 
-                    if (params.ar71xx_generic) { unstash "ar71xx-generic" }
                     if (params.ar71xx_nand) { unstash "ar71xx-nand" }
                     if (params.ar71xx_tiny) { unstash "ar71xx-tiny" }
                     if (params.brcm2708_bcm2708 ) { unstash "brcm2708-bcm2708" }
                     if (params.brcm2708_bcm2709 ) { unstash "brcm2708-bcm2709" }
                     if (params.brcm2708_bcm2710 ) { unstash "brcm2708-bcm2710" }
-                    if (params.x86_generic) { unstash "x86-generic" }
-                    if (params.x86_genode) { unstash "x86-genode" }
-                    if (params.x86_64){ unstash "x86-64" }
                     */
+                    if (params.x86_generic || params.x86_genode || params.x86_64) { unstash "x86" }
+                    /*
                     for (arch in allArchs) {
                         sh "echo unstage ${arch}"
                     }
+                    */
                     sh "make manifest GLUON_BRANCH=stable"
                     sh "make manifest GLUON_BRANCH=beta"
                     sh "make manifest GLUON_BRANCH=nightly"
