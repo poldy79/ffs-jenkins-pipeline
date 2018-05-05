@@ -31,6 +31,7 @@ def buildArch(archs) {
     sh """
         make manifest GLUON_BRANCH=stable
         tail -n +4 output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest.${STAGE_NAME}
+        cat part.manifest.${STAGE_NAME} 
         rm -f output/images/sysupgrade/stable.manifest
     """
     allArchs << "${STAGE_NAME}"
