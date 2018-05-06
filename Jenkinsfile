@@ -26,7 +26,7 @@ def buildArch(archs) {
     }
     sh "nice make update"
     for (arch in archs) {
-        #sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
+        //sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
         sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
     }
     allArchs << "${STAGE_NAME}"
