@@ -26,14 +26,9 @@ def buildArch(archs) {
     }
     sh "nice make update"
     for (arch in archs) {
-        sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
+        #sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
+        sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
     }
-    sh 'make manifest GLUON_BRANCH=stable'
-    sh 'cat output/images/sysupgrade/stable.manifest'
-    sh 'tail -n +4 output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest'
-    sh 'cat part.manifest'
-    sh 'rm -f output/images/sysupgrade/stable.manifest'
-    sh "mv output/images/sysupgrade/part.manifest output/images/sysupgrade/part.manifest.${STAGE_NAME}"
     allArchs << "${STAGE_NAME}"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
@@ -190,9 +185,6 @@ pipeline {
                         make manifest GLUON_BRANCH=stable
                         make manifest GLUON_BRANCH=beta
                         make manifest GLUON_BRANCH=nightly
-                        cat output/images/sysupgrade/part.manifest.* >> output/images/sysupgrade/stable.manifest
-                        cat output/images/sysupgrade/part.manifest.* >> output/images/sysupgrade/beta.manifest
-                        cat output/images/sysupgrade/part.manifest.* >> output/images/sysupgrade/nightly.manifest
                     """
                     archiveArtifacts artifacts: 'output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*', fingerprint: true
                 }
