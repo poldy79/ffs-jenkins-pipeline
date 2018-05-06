@@ -29,6 +29,7 @@ def buildArch(archs) {
         sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
     }
     sh 'make manifest GLUON_BRANCH=stable'
+    sh 'cat output/images/sysupgrade/stable.manifest'
     sh 'tail -n +4 output/images/sysupgrade/stable.manifest > output/images/sysupgrade/part.manifest'
     sh 'cat part.manifest'
     sh 'rm -f output/images/sysupgrade/stable.manifest'
