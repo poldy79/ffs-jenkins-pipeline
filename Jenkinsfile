@@ -124,7 +124,6 @@ pipeline {
                     agent any
                     when { expression {return params.mpc85xx_generic } }
                     steps { script { 
-                        def archs = []
                         buildArch(["mpc85xx-generic"])
                     } }
                 }
@@ -132,7 +131,7 @@ pipeline {
                     agent any
                     when { expression {return params.mvebu } }
                     steps { script { 
-                        buildArch([${STAGE_NAME}])
+                        buildArch(["${STAGE_NAME}"])
                     } }
                 }
                 stage('ramips-mt7621') {
@@ -150,7 +149,7 @@ pipeline {
                     agent any
                     when { expression {return params.sunxi } }
                     steps { script { 
-                        buildArch([${STAGE_NAME}])
+                        buildArch(["${STAGE_NAME}"])
                     } }
                 }
                 stage('x86') {
