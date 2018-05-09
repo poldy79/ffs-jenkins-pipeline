@@ -2,15 +2,12 @@
 def fetchSources() {
     checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.gluon}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
     dir('site') {
-        //checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'refs/tags/ffs-1.3']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
         checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.site}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
-        //git branch: "${params.site}", changelog: false, poll: false, url: 'https://github.com/freifunk-stuttgart/site-ffs.git'
     }
 }
 
 def buildArch(archs) {
     echo "step ${STAGE_NAME}"
-    echo "BUILD_DATE: ${BUILD_DATE}"
     if (params.clean_workspace) {
         sh 'rm -Rf *'
     }
@@ -24,9 +21,7 @@ def buildArch(archs) {
     }
     sh "nice make update"
     for (arch in archs) {
-        //sh "nice make -j`nproc` ${verbose} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
-        if (params.verbose)
-        {
+        if (params.verbose) {
             sh "nice make -j1 V=s BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
         } else {
             sh "nice make -j`nproc` BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
@@ -36,12 +31,9 @@ def buildArch(archs) {
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
 
-def architectures = ['x86-x64', 'x86-generic', 'ar71xx-generic','brcm2708-bcm2710' ] 
-
 pipeline {
     agent none
     parameters {
-        
         booleanParam(name: 'ar71xx_generic', defaultValue: true, description: '')
         booleanParam(name: 'ar71xx_mikrotik', defaultValue: true, description: '')
         booleanParam(name: 'ar71xx_nand', defaultValue: true, description: '')
@@ -66,10 +58,10 @@ pipeline {
         string(defaultValue: "refs/tags/v2017.1.7", name: 'gluon', description: 'gluon release tag')
         string(defaultValue: "*/master", name: 'site', description: 'site release tag, branch or commit')
     }
+
     options {
         timestamps()
     }
-
 
     stages {
         stage('init') {
@@ -78,7 +70,6 @@ pipeline {
                 allArchs = []
                 fetchSources()
                 BUILD_DATE = sh(returnStdout: true, script: 'date +%Y-%m-%d').trim()
-                echo "${allArchs}"
                 echo "${BUILD_DATE} in setup"
             } }
         }
@@ -165,15 +156,13 @@ pipeline {
         
         stage('manifest') {
             agent { label 'master'}
-            steps {
-                script {
+            steps { script {
                     fetchSources()
                     echo "step ${STAGE_NAME}"
                     echo "Archs: ${allArchs}"
                     dir('output') { deleteDir() }
                     
                     for (arch in allArchs) {
-                        sh "echo unstage ${arch}"
                         unstash "${arch}"
                     }
                     
@@ -183,8 +172,7 @@ pipeline {
                         make manifest GLUON_BRANCH=nightly
                     """
                     archiveArtifacts artifacts: 'output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*', fingerprint: true
-                }
-            }
+            } }
         }
     }
 }
