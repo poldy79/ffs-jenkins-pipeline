@@ -26,8 +26,8 @@ def buildArch(archs) {
     }
     sh "nice make update"
     for (arch in archs) {
-        //sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
-        if (params.VERBOSE)
+        //sh "nice make -j`nproc` ${verbose} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
+        if (params.verbose)
         {
             sh "nice make -j1 V=s BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
         } else {
@@ -62,7 +62,6 @@ pipeline {
         booleanParam(name: 'x86_geode', defaultValue: true, description: '')
         booleanParam(name: 'x86_64', defaultValue: true, description: '')
         booleanParam(name: 'verbose', defaultValue: false, description: '')
-        string(defaultValue: "4", description: 'Number of processors', name: 'processors')
         booleanParam(name: 'make_clean', defaultValue: false, description: '' )
         booleanParam(name: 'clean_workspace', defaultValue: false, description: '' )
         choice(name: 'broken', choices: '1\n0', description: '')
