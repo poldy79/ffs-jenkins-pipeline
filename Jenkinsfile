@@ -1,12 +1,10 @@
 #!/usr/bin/env groovy
 def fetchSources() {
-    //checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'refs/tags/v2017.1.7']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
-    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "refs/tags/${params.gluon}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
-    //git branch: 'master', changelog: false, poll: false, url: 'https://github.com/freifunk-gluon/gluon.git'
+    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.gluon}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
     dir('site') {
         //checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'refs/tags/ffs-1.3']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
-        git branch: "${params.site}", changelog: false, poll: false, url: 'https://github.com/freifunk-stuttgart/site-ffs.git'
-        //git branch: 'feature/specify-build-date', changelog: false, poll: false, url: 'https://github.com/freifunk-stuttgart/site-ffs.git'
+        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.site"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
+        //git branch: "${params.site}", changelog: false, poll: false, url: 'https://github.com/freifunk-stuttgart/site-ffs.git'
     }
 }
 
@@ -65,8 +63,8 @@ pipeline {
         booleanParam(name: 'make_clean', defaultValue: false, description: '' )
         booleanParam(name: 'clean_workspace', defaultValue: false, description: '' )
         choice(name: 'broken', choices: '1\n0', description: '')
-        string(defaultValue: "v2017.1.7", name: 'gluon', description: 'gluon release tag')
-        string(defaultValue: "master", name: 'site', description: 'site release tag, branch or commit')
+        string(defaultValue: "refs/tags/v2017.1.7", name: 'gluon', description: 'gluon release tag')
+        string(defaultValue: "*/master", name: 'site', description: 'site release tag, branch or commit')
     }
     options {
         timestamps()
