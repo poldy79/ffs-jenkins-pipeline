@@ -29,9 +29,9 @@ def buildArch(archs) {
         //sh "nice make -j`nproc` ${verbose} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
         if (params.verbose)
         {
-            sh "nice make -j1 V=s BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
+            sh "nice make -j1 V=s BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
         } else {
-            sh "nice make -j`nproc` BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
+            sh "nice make -j`nproc` BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch} BUILD_DATE=${BUILD_DATE}"
         }
     }
     allArchs << "${STAGE_NAME}"
