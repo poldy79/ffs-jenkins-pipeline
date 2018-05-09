@@ -79,14 +79,7 @@ pipeline {
                 script {
                     allArchs = []
                     fetchSources()
-                    BUILD_DATE = "" 
-                    if (params.BUILD_DATE != "") {
-                        BUILD_DATE=params.BUILD_DATE
-                    } else {
-                        BUILD_DATE = sh(returnStdout: true, script: 'date +%Y-%m-%d').trim()
-                        echo "${BUILD_DATE} in setup"
-                        BUILD_DATE = sh(returnStdout: true, script: 'date +%Y-%m-%d').toString().trim()
-                        echo "${BUILD_DATE} in setup"
+                    BUILD_DATE = sh(returnStdout: true, script: 'date +%Y-%m-%d').trim()
                     } 
                 }
                 echo "${allArchs}"
