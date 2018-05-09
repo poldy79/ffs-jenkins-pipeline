@@ -66,7 +66,7 @@ pipeline {
         booleanParam(name: 'clean_workspace', defaultValue: false, description: '' )
         choice(name: 'broken', choices: '1\n0', description: '')
         string(defaultValue: "v2017.1.7", name: 'gluon', description: 'gluon release tag')
-        string(defaultValue: "*/master", name: 'site', description: 'site release tag, branch or commit')
+        string(defaultValue: "master", name: 'site', description: 'site release tag, branch or commit')
     }
     options {
         timestamps()
