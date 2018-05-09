@@ -3,7 +3,7 @@ def fetchSources() {
     checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.gluon}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
     dir('site') {
         //checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'refs/tags/ffs-1.3']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
-        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.site"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
+        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.site}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-stuttgart/site-ffs.git']]]
         //git branch: "${params.site}", changelog: false, poll: false, url: 'https://github.com/freifunk-stuttgart/site-ffs.git'
     }
 }
