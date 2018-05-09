@@ -31,7 +31,7 @@ def buildArch(archs) {
         {
             sh "nice make -j1 V=s BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
         } else {
-            sh "nice make -j`nproc` ${VERBOSE} BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
+            sh "nice make -j`nproc` BROKEN=${params.broken} GLUON_BRANCH=stable GLUON_TARGET=${arch}"
         }
     }
     allArchs << "${STAGE_NAME}"
@@ -84,7 +84,9 @@ pipeline {
                     if (params.BUILD_DATE != "") {
                         BUILD_DATE=params.BUILD_DATE
                     } else {
-                        def BUILD_DATE = sh (returnStdout: true, script: 'date +%Y-%m-%d')
+                        BUILD_DATE = sh (returnStdout: true, script: 'date +%Y-%m-%d')
+                        echo "${BUILD_DATE} in setup"
+                        
                     } 
                 }
                 echo "${allArchs}"
