@@ -206,9 +206,9 @@ pipeline {
                     """
                     archiveArtifacts artifacts: 'output/images/*/*, output/packages/*/*/*/*', fingerprint: true
                     if (deploy_to != "") {
-                        sh "rsync -avxP output/images/factory ${params.deploy_to}/${BUILD_DATE}_${BUILD_TAG}/"
-                        sh "rsync -avxP output/images/sysupgrade ${params.deploy_to}/${BUILD_DATE}_${BUILD_TAG}/"
-                        sh "rsync -avxP output/packages ${params.deploy_to}/${BUILD_DATE}_${BUILD_TAG}/"
+                        sh "rsync -avx output/images/factory ${params.deploy_to}/${BUILD_DATE}_${BUILD_TAG}/"
+                        sh "rsync -avx output/images/sysupgrade ${params.deploy_to}/${BUILD_DATE}_${BUILD_TAG}/"
+                        sh "rsync -avx output/packages ${params.deploy_to}/${BUILD_DATE}_${BUILD_TAG}/"
                     }
             } }
         }
