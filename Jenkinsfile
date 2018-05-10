@@ -1,4 +1,34 @@
 #!/usr/bin/env groovy
+
+/*
+With the provided script, the firmware can be build with jenkins. Setup
+a Pipeline job and configure the pipeline definition to "Pipeline script
+from SCM". Supply as SCM git and as repository
+https://github.com/freifunk-stuttgart/site-ffs.git. All other options
+can be left at their default. If neccessary configure the branch
+specifier. The job parameters will be filled when the job is started the
+first time. If you do not want to build all architectures, cancel the
+buold and trigger a parameterized build where you can now choose the
+architectures to be build.
+
+The init and manifest stage will be executed on the master, all other
+stages are executed on any node. This job can use eight build slaves to
+build the firmware. 
+
+On each slave, nproc is used to run make with all available cpu cores. 
+
+Per default, all broken targets will be build also. You can choose to
+run make clean before building each architecture. You can check
+clean_workspace to build entirely from scratch. 
+
+Note that bcrm2708_2710 is not supported with v2017.1.7, but on gluon
+master branch. It will be supported in a later release. 
+
+If you want to use a different gluon version, you can modify the gluon
+parameter, if you want to use a custom site-ffs version, you can modify
+the site parameter
+*/
+
 def fetchSources() {
     checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "${params.gluon}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/freifunk-gluon/gluon.git']]]
     dir('site') {
@@ -28,6 +58,9 @@ def buildArch(archs) {
         }
     }
     allArchs << "${STAGE_NAME}"
+    sh "find output/images"
+    sh "find output/modules"
+    sh "find output/packages"
     stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
 }
 
