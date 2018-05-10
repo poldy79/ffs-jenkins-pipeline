@@ -79,7 +79,7 @@ pipeline {
         booleanParam(name: 'ramips_mt7621', defaultValue: true, description: '')
         booleanParam(name: 'ramips_mt7628', defaultValue: true, description: '')
         booleanParam(name: 'ramips_rt305x', defaultValue: true, description: '')
-        booleanParam(name: 'sunxi', defaultValue: true, description: '')
+        booleanParam(name: 'sunxi', defaultValue: false, description: '')
         booleanParam(name: 'x86_generic', defaultValue: true, description: '')
         booleanParam(name: 'x86_geode', defaultValue: true, description: '')
         booleanParam(name: 'x86_64', defaultValue: true, description: '')
