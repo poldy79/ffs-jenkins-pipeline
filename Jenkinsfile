@@ -59,9 +59,8 @@ def buildArch(archs) {
     }
     allArchs << "${STAGE_NAME}"
     sh "find output/images"
-    sh "find output/modules"
     sh "find output/packages"
-    stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*"
+    stash name: "${STAGE_NAME}", includes: "output/images/*/*, output/packages/*/*/*/*"
 }
 
 pipeline {
@@ -84,12 +83,13 @@ pipeline {
         booleanParam(name: 'x86_generic', defaultValue: true, description: '')
         booleanParam(name: 'x86_geode', defaultValue: true, description: '')
         booleanParam(name: 'x86_64', defaultValue: true, description: '')
-        booleanParam(name: 'verbose', defaultValue: false, description: '')
-        booleanParam(name: 'make_clean', defaultValue: false, description: '' )
-        booleanParam(name: 'clean_workspace', defaultValue: false, description: '' )
-        choice(name: 'broken', choices: '1\n0', description: '')
+        booleanParam(name: 'verbose', defaultValue: false, description: 'build with -j1 and V=s for debugging build errors')
+        booleanParam(name: 'make_clean', defaultValue: false, description: 'execute make clean before building each architecture' )
+        booleanParam(name: 'clean_workspace', defaultValue: false, description: 'delete all files in workspace before building' )
+        choice(name: 'broken', choices: '1\n0', description: 'wether to build broken targets or not')
         string(defaultValue: "refs/tags/v2017.1.7", name: 'gluon', description: 'gluon release tag')
         string(defaultValue: "*/master", name: 'site', description: 'site release tag, branch or commit')
+        string(defaultValue: "", name: 'deploy_to', description: 'target for rsync\nExample: www@netinfo:/home/www/html/firmware/gluon/archive/@leonard")
     }
 
     options {
@@ -187,7 +187,7 @@ pipeline {
             }
         }
         
-        stage('manifest') {
+        stage('manifest and deploy') {
             agent { label 'master'}
             steps { script {
                     fetchSources()
@@ -204,7 +204,12 @@ pipeline {
                         make manifest GLUON_BRANCH=beta
                         make manifest GLUON_BRANCH=nightly
                     """
-                    archiveArtifacts artifacts: 'output/images/*/*, output/modules/*/*/*/*, output/packages/*/*/*/*', fingerprint: true
+                    archiveArtifacts artifacts: 'output/images/*/*, output/packages/*/*/*/*', fingerprint: true
+                    if (deploy_to != "") {
+                        sh "rsync -avxP output/images/factory ${params.deploy_to}/${BUILD_TAG}/"
+                        sh "rsync -avxP output/images/sysupgrade ${params.deploy_to}/${BUILD_TAG}/"
+                        sh "rsync -avxP output/packages ${params.deploy_to}/${BUILD_TAG}/"
+                    }
             } }
         }
     }
