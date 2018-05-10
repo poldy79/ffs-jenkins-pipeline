@@ -89,7 +89,7 @@ pipeline {
         choice(name: 'broken', choices: '1\n0', description: 'wether to build broken targets or not')
         string(defaultValue: "refs/tags/v2017.1.7", name: 'gluon', description: 'gluon release tag')
         string(defaultValue: "*/master", name: 'site', description: 'site release tag, branch or commit')
-        string(defaultValue: "", name: 'deploy_to', description: 'target for rsync\nExample: www@netinfo:/home/www/html/firmware/gluon/archive/@leonard")
+        string(defaultValue: "", name: 'deploy_to', description: 'target for rsync\nExample: www@netinfo:/home/www/html/firmware/gluon/archive/@leonard')
     }
 
     options {
